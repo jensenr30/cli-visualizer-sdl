@@ -107,24 +107,32 @@ vis::NcursesWriter::NcursesWriter()
 
     handle_window_resize_event(720, 620);
 
-    // todo move elsewhere
-    // update screen texture
-    // SDL_UpdateTexture(screen_texture, nullptr, screen->pixels, screen->pitch);
-    // // clear renderer
-    // SDL_RenderClear(renderer);
-
-    // // copy image into renderer to be rendered
-    // SDL_RenderCopy(renderer, screen_texture, NULL, NULL);
 }
+
 
 void vis::NcursesWriter::SDL_Loop()
 {
-    printf("Hello World!\n");
+    SDL_Event event;
     while(SDL_PollEvent(&event)) {
         if(event.type == SDL_QUIT) {
             exit_msg("sdl_quit\n");
+        } else if (event.type == SDL_WINDOWEVENT) {
+            if (event.window.event == SDL_WINDOWEVENT_CLOSE) {
+                exit_msg("window quit!\n");
+            } else if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
+                printf("window resize event\n");
+                handle_window_resize_event(event.window.data1, event.window.data2);
+            }
         }
     }
+
+    printf("update texture\n");
+    // update screen texture
+    SDL_UpdateTexture(screen_texture, nullptr, screen->pixels, screen->pitch);
+    // clear renderer
+    SDL_RenderClear(renderer);
+    // // copy image into renderer to be rendered
+    SDL_RenderCopy(renderer, screen_texture, NULL, NULL);
 }
 
 void vis::NcursesWriter::setup_color_pairs(
