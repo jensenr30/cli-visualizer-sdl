@@ -8,6 +8,7 @@
 #include "Visualizer.h"
 #include "Domain/VisConstants.h"
 #include "Domain/VisException.h"
+#include "Writer/NcursesWriter.h"
 #include "Source/MpdAudioSource.h"
 #include "Source/PortAudioSource.h"
 #include "Source/PulseAudioSource.h"
@@ -189,6 +190,8 @@ void vis::Visualizer::run()
             is_received_reload_signal = false;
             reload_config();
         }
+
+        m_writer->SDL_Loop();
     }
 }
 

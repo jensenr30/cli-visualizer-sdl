@@ -30,6 +30,37 @@ void exit_msg(const char *msg) {
     exit(1);
 }
 
+SDL_Surface *screen;
+SDL_Renderer *renderer;
+SDL_Texture *screen_texture;
+static uint32_t SCREEN_WIDTH;
+static uint32_t SCREEN_HEIGHT;
+
+static void handle_window_resize_event(uint32_t width, uint32_t height) {
+    SCREEN_WIDTH = width;
+    SCREEN_HEIGHT = height;
+
+    if (screen != nullptr) {
+        SDL_FreeSurface(screen);
+    }
+    screen = SDL_CreateRGBSurfaceWithFormat(
+        0,
+        SCREEN_WIDTH,
+        SCREEN_HEIGHT,
+        32,
+        SDL_PIXELFORMAT_ARGB8888);
+
+    if (screen_texture != nullptr) {
+        SDL_DestroyTexture(screen_texture);
+    }
+    screen_texture = SDL_CreateTexture(
+        renderer,
+        SDL_PIXELFORMAT_ARGB8888,
+        SDL_TEXTUREACCESS_STREAMING,
+        SCREEN_WIDTH,
+        SCREEN_HEIGHT);
+}
+
 vis::NcursesWriter::NcursesWriter()
 {
     initscr();
@@ -62,12 +93,7 @@ vis::NcursesWriter::NcursesWriter()
     }
 
     // setup SDL window
-    uint32_t screen_width = 720;
-    uint32_t screen_height = 480;
-    SDL_Surface *screen;
-    SDL_Renderer *renderer;
-    SDL_Texture *screen_texture;
-    SDL_Window *window = SDL_CreateWindow("TileVenture", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, screen_width, screen_height, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
+    SDL_Window *window = SDL_CreateWindow("TileVenture", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
     if(window == nullptr) {
         exit_msg("Could not init SDL Window");
     }
@@ -79,6 +105,7 @@ vis::NcursesWriter::NcursesWriter()
     }
     SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
 
+    handle_window_resize_event(720, 620);
 
     // todo move elsewhere
     // update screen texture
@@ -88,8 +115,16 @@ vis::NcursesWriter::NcursesWriter()
 
     // // copy image into renderer to be rendered
     // SDL_RenderCopy(renderer, screen_texture, NULL, NULL);
+}
 
-
+void vis::NcursesWriter::SDL_Loop()
+{
+    printf("Hello World!\n");
+    while(SDL_PollEvent(&event)) {
+        if(event.type == SDL_QUIT) {
+            exit_msg("sdl_quit\n");
+        }
+    }
 }
 
 void vis::NcursesWriter::setup_color_pairs(

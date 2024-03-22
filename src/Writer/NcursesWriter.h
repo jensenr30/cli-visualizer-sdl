@@ -48,6 +48,13 @@ class NcursesWriter
     virtual ColorDefinition to_color_pair(int32_t number, int32_t max,
                                           std::vector<ColorDefinition> colors,
                                           bool wrap) const;
+
+    /**
+     * graphical rendering using SDL
+     *
+     */
+    void SDL_Loop();
+
     /**
      * Initialize color pairs for ncurses
      */
