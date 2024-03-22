@@ -127,12 +127,15 @@ void vis::NcursesWriter::SDL_Loop()
     }
 
     printf("update texture\n");
+    SDL_FillRect(screen, nullptr, 0x000000);
     // update screen texture
     SDL_UpdateTexture(screen_texture, nullptr, screen->pixels, screen->pitch);
     // clear renderer
     SDL_RenderClear(renderer);
     // // copy image into renderer to be rendered
     SDL_RenderCopy(renderer, screen_texture, NULL, NULL);
+    // present that shit
+    SDL_RenderPresent(renderer);
 }
 
 void vis::NcursesWriter::setup_color_pairs(
