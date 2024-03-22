@@ -37,6 +37,7 @@ static uint32_t SCREEN_WIDTH;
 static uint32_t SCREEN_HEIGHT;
 
 static void handle_window_resize_event(uint32_t width, uint32_t height) {
+    printf("width %d, height %d\n", width, height);
     SCREEN_WIDTH = width;
     SCREEN_HEIGHT = height;
 
@@ -106,7 +107,6 @@ vis::NcursesWriter::NcursesWriter()
     SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
 
     handle_window_resize_event(720, 620);
-
 }
 
 
@@ -126,8 +126,10 @@ void vis::NcursesWriter::SDL_Loop()
         }
     }
 
-    printf("update texture\n");
+    // printf("update texture\n");
     SDL_FillRect(screen, nullptr, 0x000000);
+    SDL_Rect rect = {.x = 0, .y = 0, .w = 100, .h = 100};
+    SDL_FillRect(screen, &rect, 0xffffffff);
     // update screen texture
     SDL_UpdateTexture(screen_texture, nullptr, screen->pixels, screen->pitch);
     // clear renderer
@@ -214,6 +216,13 @@ void vis::NcursesWriter::write(const int32_t row, const int32_t column,
     if (character == VisConstants::k_space_wchar)
     {
         write_background(row, column, color, msg);
+        SDL_Rect rect = {.x = column, .y = row, .w = 1, .h = 1};
+        // SDL_Color sdl_color;
+        // sdl_color.a = 0xff;
+        // sdl_color.r = color.get_red();
+        // sdl_color.g = color.get_green();
+        // sdl_color.b = color.get_blue();
+        SDL_FillRect(screen, &rect, 0xffff00ff);
     }
     else
     {
