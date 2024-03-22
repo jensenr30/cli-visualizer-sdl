@@ -36,3 +36,5 @@ bin/safe_fifo
 .ycm_extra_conf.pyc
 
 gtestresults.xml
+.cache
+

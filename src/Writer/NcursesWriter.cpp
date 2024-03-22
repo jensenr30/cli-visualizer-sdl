@@ -11,6 +11,8 @@
 #include "Utils/NcursesUtils.h"
 #include "Writer/NcursesWriter.h"
 
+#include <SDL2/SDL.h>
+
 #ifdef _LINUX
 /* Ncurses version 6.0.20170401 introduced an issue with COLOR_PAIR which broke
  * setting more than 256 color pairs. Specifically it uses an A_COLOR macro
@@ -22,6 +24,11 @@
 #else
 #define VIS_COLOR_PAIR(n) (COLOR_PAIR(n))
 #endif
+
+void exit_msg(const char *msg) {
+    printf("%s", msg);
+    exit(1);
+}
 
 vis::NcursesWriter::NcursesWriter()
 {
@@ -36,6 +43,53 @@ vis::NcursesWriter::NcursesWriter()
         use_default_colors(); // uses default colors of terminal, which allows
                               // transparency to work
     }
+
+    // setup SDL
+    uint32_t flags = 0;
+    #ifdef __linux__
+        flags = SDL_INIT_EVERYTHING;
+    #elif __MINGW32__
+        // specifically for wine otherwise im pretty sure SDL_INIT_EVERYTHING works on normal windows
+        // SDL_INIT_SENSOR doesn't seem to work on wine right now
+        flags = SDL_INIT_TIMER | SDL_INIT_AUDIO | SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_JOYSTICK | SDL_INIT_HAPTIC | SDL_INIT_GAMECONTROLLER;
+    #elif __EMSCRIPTEN__
+        flags = SDL_INIT_TIMER | SDL_INIT_AUDIO | SDL_INIT_VIDEO | SDL_INIT_EVENTS;
+    #else
+        exit_msg("no flags supported yet");
+    #endif
+    if(SDL_Init(flags) == -1) {
+        exit_msg("Could not init SDL");
+    }
+
+    // setup SDL window
+    uint32_t screen_width = 720;
+    uint32_t screen_height = 480;
+    SDL_Surface *screen;
+    SDL_Renderer *renderer;
+    SDL_Texture *screen_texture;
+    SDL_Window *window = SDL_CreateWindow("TileVenture", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, screen_width, screen_height, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
+    if(window == nullptr) {
+        exit_msg("Could not init SDL Window");
+    }
+
+    // create renderer
+    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+    if (renderer == nullptr) {
+        exit_msg("Could not init renderer\n");
+    }
+    SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+
+
+    // todo move elsewhere
+    // update screen texture
+    // SDL_UpdateTexture(screen_texture, nullptr, screen->pixels, screen->pitch);
+    // // clear renderer
+    // SDL_RenderClear(renderer);
+
+    // // copy image into renderer to be rendered
+    // SDL_RenderCopy(renderer, screen_texture, NULL, NULL);
+
+
 }
 
 void vis::NcursesWriter::setup_color_pairs(

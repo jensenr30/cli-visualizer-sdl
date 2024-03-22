@@ -148,6 +148,11 @@ target_link_libraries(${PROJECT_NAME} ${DYNAMIC_LIBRARIES})
 install (TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)
 
 ########################################################################
+# SDL
+########################################################################
+target_link_libraries(${PROJECT_NAME} SDL2)
+
+########################################################################
 # Add Test libraries
 ########################################################################
 include(ExternalProject)
