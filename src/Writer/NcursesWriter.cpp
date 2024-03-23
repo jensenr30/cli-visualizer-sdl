@@ -215,20 +215,21 @@ void vis::NcursesWriter::write(const int32_t row, const int32_t column,
     if (character == VisConstants::k_space_wchar)
     {
         write_background(row, column, color, msg);
-        // todo remove this temporary scaling factor
-        int s = 8;
-        SDL_Rect rect = {.x = column*s, .y = row*s, .w = 1*s, .h = 1*s};
-        uint8_t a = 0xff;
-        uint8_t r = color.get_red();
-        uint8_t g = color.get_green();
-        uint8_t b = color.get_blue();
-        uint32_t color = a << 24 | r << 16 | g << 8 | b;
-        SDL_FillRect(screen, &rect, color);
     }
     else
     {
         write_foreground(row, column, color, msg);
     }
+    // todo remove this temporary scaling factor
+    int s = 8;
+    SDL_Rect rect = {.x = column*s, .y = row*s, .w = 1*s, .h = 1*s};
+    uint8_t a = 0xff;
+    uint8_t r = color.get_red();
+    uint8_t g = color.get_green();
+    uint8_t b = color.get_blue();
+    uint32_t color_argb = a << 24 | r << 16 | g << 8 | b;
+    SDL_FillRect(screen, &rect, color_argb);
+    // printf("row %d, column %d\n", row, column);
 }
 
 void vis::NcursesWriter::clear()
