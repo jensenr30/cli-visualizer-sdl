@@ -127,9 +127,8 @@ void vis::NcursesWriter::SDL_Loop()
     }
 
     // printf("update texture\n");
-    SDL_FillRect(screen, nullptr, 0x000000);
-    SDL_Rect rect = {.x = 0, .y = 0, .w = 100, .h = 100};
-    SDL_FillRect(screen, &rect, 0xffffffff);
+    // SDL_Rect rect = {.x = 0, .y = 0, .w = 100, .h = 100};
+    // SDL_FillRect(screen, &rect, 0xffffffff);
     // update screen texture
     SDL_UpdateTexture(screen_texture, nullptr, screen->pixels, screen->pitch);
     // clear renderer
@@ -216,13 +215,19 @@ void vis::NcursesWriter::write(const int32_t row, const int32_t column,
     if (character == VisConstants::k_space_wchar)
     {
         write_background(row, column, color, msg);
-        SDL_Rect rect = {.x = column, .y = row, .w = 1, .h = 1};
+        // todo remove this temporary scaling factor
+        int s = 8;
+        SDL_Rect rect = {.x = column*s, .y = row*s, .w = 1*s, .h = 1*s};
+        uint8_t a = 0xff;
+        uint8_t r = color.get_red();
+        uint8_t g = color.get_green();
+        uint8_t b = color.get_blue();
         // SDL_Color sdl_color;
         // sdl_color.a = 0xff;
         // sdl_color.r = color.get_red();
         // sdl_color.g = color.get_green();
         // sdl_color.b = color.get_blue();
-        SDL_FillRect(screen, &rect, 0xffff00ff);
+        SDL_FillRect(screen, &rect, 0xff0033ff);
     }
     else
     {
@@ -234,6 +239,7 @@ void vis::NcursesWriter::clear()
 {
     standend();
     erase();
+    SDL_FillRect(screen, nullptr, 0x000000);
 }
 
 void vis::NcursesWriter::flush()
