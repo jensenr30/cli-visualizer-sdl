@@ -222,12 +222,8 @@ void vis::NcursesWriter::write(const int32_t row, const int32_t column,
         uint8_t r = color.get_red();
         uint8_t g = color.get_green();
         uint8_t b = color.get_blue();
-        // SDL_Color sdl_color;
-        // sdl_color.a = 0xff;
-        // sdl_color.r = color.get_red();
-        // sdl_color.g = color.get_green();
-        // sdl_color.b = color.get_blue();
-        SDL_FillRect(screen, &rect, 0xff0033ff);
+        uint32_t color = a << 24 | r << 16 | g << 8 | b;
+        SDL_FillRect(screen, &rect, color);
     }
     else
     {
