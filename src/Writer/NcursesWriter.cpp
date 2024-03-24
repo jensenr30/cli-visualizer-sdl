@@ -222,7 +222,14 @@ void vis::NcursesWriter::write(const int32_t row, const int32_t column,
     }
     // todo remove this temporary scaling factor
     int s = 8;
-    SDL_Rect rect = {.x = column*s, .y = row*s, .w = 1*s, .h = 1*s};
+    int32_t terminal_bar_width_in_chars = msg.size();
+
+    SDL_Rect rect = {
+        .x = s*column,
+        .y = s*row,
+        .w = s*terminal_bar_width_in_chars,
+        .h = s*1,
+    };
     uint8_t a = 0xff;
     uint8_t r = color.get_red();
     uint8_t g = color.get_green();
