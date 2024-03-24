@@ -223,12 +223,13 @@ void vis::NcursesWriter::write(const int32_t row, const int32_t column,
     // todo remove this temporary scaling factor
     int s = 8;
     int32_t terminal_bar_width_in_chars = msg.size();
-
+    int terminal_height = NcursesUtils::get_window_height();
+    int vertical_scale_factor = SCREEN_HEIGHT / terminal_height;
     SDL_Rect rect = {
         .x = s*column,
-        .y = s*row,
+        .y = vertical_scale_factor*row,
         .w = s*terminal_bar_width_in_chars,
-        .h = s*1,
+        .h = vertical_scale_factor,
     };
     uint8_t a = 0xff;
     uint8_t r = color.get_red();
