@@ -37,4 +37,4 @@ bin/safe_fifo
 
 gtestresults.xml
 .cache
-
+compile_commands.json
