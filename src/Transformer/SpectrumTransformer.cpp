@@ -510,9 +510,9 @@ void vis::SpectrumTransformer::create_spectrum_bars(
     // record the previous values of the bars
     int num_bars = old_bars.size();
     double low_pass_factor_falling = 0.03;
-    double low_pass_factor_rising = low_pass_factor_falling * 3;;
+    double low_pass_factor_rising = low_pass_factor_falling * 3;
     for (int i = 0; i < num_bars; i++) {
-        if ((*bars)[i] > old_bars[i]) {
+        if ((*bars)[i] > old_bars[i] + 5) {
             (*bars)[i] = old_bars[i] * (1 - low_pass_factor_falling) + (*bars)[i] * low_pass_factor_rising;
         } else {
             (*bars)[i] = old_bars[i] * (1 - low_pass_factor_falling) + (*bars)[i] * low_pass_factor_falling;
