@@ -205,32 +205,33 @@ void vis::NcursesWriter::write_foreground(int32_t height, int32_t width,
     attroff(VIS_COLOR_PAIR(color.get_color_index()));
 }
 
-void vis::NcursesWriter::write(const int32_t row, const int32_t column,
+void vis::NcursesWriter::write(const double row, const double column,
                                const vis::ColorDefinition color,
                                const std::wstring &msg, const wchar_t character)
 {
     // This is a hack to achieve a solid bar look without using a custom font.
     // Instead of writing a real character, set the background to the color and
     // write a space
-    if (character == VisConstants::k_space_wchar)
-    {
-        write_background(row, column, color, msg);
-    }
-    else
-    {
-        write_foreground(row, column, color, msg);
-    }
+    // if (character == VisConstants::k_space_wchar)
+    // {
+    //     write_background(row, column, color, msg);
+    // }
+    // else
+    // {
+    //     write_foreground(row, column, color, msg);
+    // }
     int32_t terminal_bar_width_in_chars = msg.size();
     int terminal_height = NcursesUtils::get_window_height();
     int terminal_width = NcursesUtils::get_window_width();
     int vertical_scale_factor = SCREEN_HEIGHT / terminal_height;
     int horizontal_scale_factor = SCREEN_WIDTH / terminal_width;
-    SDL_Rect rect = {
-        .x = horizontal_scale_factor*column,
-        .y = vertical_scale_factor*row,
-        .w = horizontal_scale_factor*terminal_bar_width_in_chars,
-        .h = vertical_scale_factor,
-    };
+
+    SDL_Rect rect;
+    rect.x = (double)horizontal_scale_factor*column;
+    rect.y = (double)vertical_scale_factor*row;
+    rect.w = horizontal_scale_factor*terminal_bar_width_in_chars;
+    rect.h = vertical_scale_factor + 1;
+
     uint8_t a = 0xff;
     uint8_t r = color.get_red();
     uint8_t g = color.get_green();

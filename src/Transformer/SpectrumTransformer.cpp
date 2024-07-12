@@ -21,6 +21,8 @@
 #include <numeric>
 #include <thread>
 
+#include <SDL2/SDL.h>
+
 namespace
 {
 const size_t k_secs_for_autoscaling = 30;
@@ -468,6 +470,19 @@ void vis::SpectrumTransformer::create_spectrum_bars(
     const uint32_t number_of_bars, std::vector<double> *bars,
     std::vector<double> *bars_falloff)
 {
+    static std::vector<double> old_bars;
+    static int resize_count = 0;
+    // make sure the old_bars are always the same length as the new bars
+    if (old_bars.size() != bars->size()) {
+        resize_count++;
+        old_bars.clear();
+        for(double bar : *bars) {
+            old_bars.push_back((bar));
+        }
+    }
+
+    printf("resize_count = %d\n", resize_count);
+
     // cut off frequencies only have to be re-calculated if number of bars
     // change
     if (m_previous_win_width != win_width)
@@ -491,6 +506,19 @@ void vis::SpectrumTransformer::create_spectrum_bars(
 
     // falloff, save values for next falloff run
     apply_falloff(*bars, bars_falloff);
+
+    // record the previous values of the bars
+    int num_bars = old_bars.size();
+    double low_pass_factor_falling = 0.03;
+    double low_pass_factor_rising = low_pass_factor_falling * 3;;
+    for (int i = 0; i < num_bars; i++) {
+        if ((*bars)[i] > old_bars[i]) {
+            (*bars)[i] = old_bars[i] * (1 - low_pass_factor_falling) + (*bars)[i] * low_pass_factor_rising;
+        } else {
+            (*bars)[i] = old_bars[i] * (1 - low_pass_factor_falling) + (*bars)[i] * low_pass_factor_falling;
+        }
+        old_bars[i] = (*bars)[i];
+    }
 }
 
 void vis::SpectrumTransformer::draw_bars(
@@ -537,22 +565,29 @@ void vis::SpectrumTransformer::draw_bars(
 
         bar_height = std::max(0.0, bar_height);
 
-        for (auto row_index = 0; row_index <= static_cast<int32_t>(bar_height);
-             ++row_index)
+        int bar_height_int = static_cast<int32_t>(bar_height);
+        // double bar_height_rounding_error = bar_height - bar_height_int;
+        double row_height;
+        int32_t column;
+        int32_t row_index = 0;
+        for (; row_index <= bar_height_int + 1; ++row_index)
         {
-            int32_t row_height;
-
             // left channel grows up, right channel grows down
+            double row_index_HACK = row_index;
+            if (row_index > bar_height) {
+                row_index_HACK = bar_height;
+            }
+
             if (flipped)
             {
-                row_height = win_height - row_index - 1;
+                row_height = win_height - row_index_HACK - 1;
             }
             else
             {
-                row_height = win_height + row_index - 1;
+                row_height = win_height + row_index_HACK - 1;
             }
 
-            auto column =
+            column =
                 static_cast<int32_t>(original_column_index) *
                 static_cast<int32_t>((bar_row_msg.size() +
                                       m_settings->get_spectrum_bar_spacing()));
@@ -563,35 +598,35 @@ void vis::SpectrumTransformer::draw_bars(
                           bar_row_msg, m_settings->get_spectrum_character());
         }
 
-        if (m_settings->get_spectrum_falloff_mode() == vis::FalloffMode::Top)
-        {
-            auto row_index = static_cast<int32_t>(bars_falloff[column_index]);
-            int32_t top_row_height;
+        // if (m_settings->get_spectrum_falloff_mode() == vis::FalloffMode::Top)
+        // {
+        //     auto row_index = static_cast<int32_t>(bars_falloff[column_index]);
+        //     int32_t top_row_height;
 
-            // left channel grows up, right channel grows down
-            if (flipped)
-            {
-                top_row_height = win_height - row_index - 1;
-            }
-            else
-            {
-                top_row_height = win_height + row_index - 1;
-            }
+        //     // left channel grows up, right channel grows down
+        //     if (flipped)
+        //     {
+        //         top_row_height = win_height - row_index - 1;
+        //     }
+        //     else
+        //     {
+        //         top_row_height = win_height + row_index - 1;
+        //     }
 
-            if (row_index > 0)
-            {
-                auto column = static_cast<int32_t>(original_column_index) *
-                              static_cast<int32_t>(
-                                  (bar_row_msg.size() +
-                                   m_settings->get_spectrum_bar_spacing()));
+        //     if (row_index > 0)
+        //     {
+        //         auto column = static_cast<int32_t>(original_column_index) *
+        //                       static_cast<int32_t>(
+        //                           (bar_row_msg.size() +
+        //                            m_settings->get_spectrum_bar_spacing()));
 
-                writer->write(
-                    top_row_height + top_margin - bottom_margin,
-                    column + left_margin,
-                    m_precomputed_colors[static_cast<size_t>(row_index)],
-                    bar_row_msg, m_settings->get_spectrum_character());
-            }
-        }
+        //         writer->write(
+        //             top_row_height + top_margin - bottom_margin,
+        //             column + left_margin,
+        //             m_precomputed_colors[static_cast<size_t>(row_index)],
+        //             bar_row_msg, m_settings->get_spectrum_character());
+        //     }
+        // }
     }
 }
 
